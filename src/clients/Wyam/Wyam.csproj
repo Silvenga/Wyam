@@ -129,6 +129,7 @@
     <Compile Include="LiveReload\Messages\ILiveReloadMessage.cs" />
     <Compile Include="LiveReload\ReloadClient.cs" />
     <Compile Include="LiveReload\Messages\ReloadMessage.cs" />
+    <Compile Include="Owin\NullTraceOutputFactory.cs" />
     <Compile Include="Owin\VirtualDirectoryExtensions.cs" />
     <Compile Include="Owin\VirtualDirectoryMiddleware.cs" />
     <Compile Include="PreviewServer.cs" />

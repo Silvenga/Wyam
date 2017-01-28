@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 using Microsoft.Owin;
@@ -89,14 +88,6 @@ namespace Wyam
                               + (virtualDirectory == null ? string.Empty : $" with virtual directory {virtualDirectory.FullPath}"));
 
             return server;
-        }
-
-        private class NullTraceOutputFactory : ITraceOutputFactory
-        {
-            public TextWriter Create(string outputFile)
-            {
-                return StreamWriter.Null;
-            }
         }
     }
 }
