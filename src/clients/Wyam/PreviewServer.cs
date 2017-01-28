@@ -1,21 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+
 using Microsoft.Owin;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.Hosting;
 using Microsoft.Owin.Hosting.Tracing;
 using Microsoft.Owin.StaticFiles;
+
 using Owin;
+
 using Wyam.Common.IO;
 using Wyam.Common.Tracing;
+using Wyam.LiveReload;
 using Wyam.Owin;
 
 namespace Wyam
 {
     internal static class PreviewServer
     {
-        public static IDisposable Start(DirectoryPath path, int port, bool forceExtension, DirectoryPath virtualDirectory)
+        public static IDisposable Start(DirectoryPath path, int port, bool forceExtension, DirectoryPath virtualDirectory,
+                                                  LiveReloadServer liveReloadServer)
         {
             IDisposable server;
             try
@@ -59,7 +65,7 @@ namespace Wyam
                     {
                         RequestPath = PathString.Empty,
                         FileSystem = outputFolder,
-                        DefaultFileNames = new List<string> { "index.html", "index.htm", "home.html", "home.htm", "default.html", "default.html" }
+                        DefaultFileNames = new List<string> {"index.html", "index.htm", "home.html", "home.htm", "default.html", "default.html"}
                     });
                     app.UseStaticFiles(new StaticFileOptions
                     {
@@ -67,6 +73,10 @@ namespace Wyam
                         FileSystem = outputFolder,
                         ServeUnknownFileTypes = true
                     });
+
+                    // Configure required middleware for the LiveReload protocol.
+                    // Run last in the pipeline. We want any user scripts to take precedents.
+                    liveReloadServer?.InjectOwinMiddleware(app);
                 });
             }
             catch (Exception ex)
@@ -76,7 +86,8 @@ namespace Wyam
             }
 
             Trace.Information($"Preview server listening on port {port} and serving from path {path}"
-                + (virtualDirectory == null ? string.Empty : $" with virtual directory {virtualDirectory.FullPath}"));
+                              + (virtualDirectory == null ? string.Empty : $" with virtual directory {virtualDirectory.FullPath}"));
+
             return server;
         }
 
