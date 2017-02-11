@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 using Microsoft.Owin;
 using Microsoft.Owin.FileSystems;
@@ -20,13 +20,10 @@ namespace Wyam.LiveReload
 {
     internal class LiveReloadServer : IDisposable
     {
-        private readonly ReloadClientServiceLocator _clientServiceLocator;
+        private readonly ConcurrentBag<IReloadClient> _clients = new ConcurrentBag<IReloadClient>();
         private IDisposable _server;
 
-        public LiveReloadServer(ReloadClientServiceLocator clientServiceLocator = null)
-        {
-            _clientServiceLocator = clientServiceLocator ?? new ReloadClientServiceLocator();
-        }
+        public virtual IEnumerable<IReloadClient> ReloadClients => _clients.ToArray();
 
         public void StartStandaloneHost(int port = 35729)
         {
@@ -59,13 +56,12 @@ namespace Wyam.LiveReload
             });
 
             // Host ws://
-            app.MapWebSocketRoute<ReloadClient>("/livereload", _clientServiceLocator);
+            app.MapFleckRoute<ReloadClient>("/livereload", connection => _clients.Add((ReloadClient) connection));
         }
 
         public void RebuildCompleted(ICollection<string> filesChanged)
         {
-            IEnumerable<IReloadClient> clientsToNotify = _clientServiceLocator.ReloadClients;
-            foreach (IReloadClient client in clientsToNotify.Where(x => x.IsConnected))
+            foreach (IReloadClient client in ReloadClients.Where(x => x.IsConnected))
             {
                 foreach (string modifiedFile in filesChanged)
                 {
