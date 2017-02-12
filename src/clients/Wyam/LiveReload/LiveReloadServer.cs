@@ -25,18 +25,23 @@ namespace Wyam.LiveReload
 
         public virtual IEnumerable<IReloadClient> ReloadClients => _clients.ToArray();
 
-        public void StartStandaloneHost(int port = 35729)
+        public void StartStandaloneHost(int port = 35729, bool throwExceptions = false)
         {
             try
             {
-                // This must be 127.0.0.1 due to http.sys hostname verification, LiveReload hardcodes it.
-                StartOptions options = new StartOptions("http://127.0.0.1:" + port);
+                StartOptions options = new StartOptions($"http://localhost:{port}");
+                options.Urls.Add($"http://127.0.0.1:{port}"); // This must be 127.0.0.1 due to http.sys hostname verification, LiveReload hardcodes it.
+                options.Urls.Add($"http://[::1]:{port}"); // IPv6 Localhost, because why not? All supported platforms should be IPv6 localhost. I hope...
                 options.Settings.Add(typeof(ITraceOutputFactory).FullName, typeof(NullTraceOutputFactory).AssemblyQualifiedName);
                 _server = WebApp.Start(options, InjectOwinMiddleware);
             }
             catch (Exception ex)
             {
                 Trace.Warning($"Error while running the LiveReload server: {ex.Message}");
+                if (throwExceptions)
+                {
+                    throw;
+                }
             }
 
             Trace.Verbose($"LiveReload server listening on port {port}.");
