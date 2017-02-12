@@ -25,6 +25,10 @@ namespace Wyam.Tests.LiveReload
         [Test]
         public async Task ServerShouldAcceptRequestsFromLocalhost()
         {
+            if (IsWindows7OrLower())
+            {
+                Assert.Inconclusive();
+            }
             var port = GetEphemeralPort();
             _reloadServer.StartStandaloneHost(port);
 
@@ -40,6 +44,10 @@ namespace Wyam.Tests.LiveReload
         [Test]
         public async Task ServerShouldAcceptRequestsFrom127001()
         {
+            if (IsWindows7OrLower())
+            {
+                Assert.Inconclusive();
+            }
             var port = GetEphemeralPort();
             _reloadServer.StartStandaloneHost(port);
 
@@ -49,7 +57,7 @@ namespace Wyam.Tests.LiveReload
             };
             var response = await client.GetAsync("livereload.js");
 
-            Assert.IsTrue(response.IsSuccessStatusCode);
+            Assert.IsTrue(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
         }
 
         private static int GetEphemeralPort()
@@ -61,6 +69,13 @@ namespace Wyam.Tests.LiveReload
             int port = ((IPEndPoint) listener.LocalEndpoint).Port;
             listener.Stop();
             return port;
+        }
+
+        private static bool IsWindows7OrLower()
+        {
+            // Based on http://stackoverflow.com/a/2732463/2001966
+            OperatingSystem os = Environment.OSVersion;
+            return (os.Platform == PlatformID.Win32NT) && (os.Version.Major <= 7);
         }
 
         public void Dispose()

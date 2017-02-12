@@ -30,8 +30,11 @@ namespace Wyam.LiveReload
             try
             {
                 StartOptions options = new StartOptions($"http://localhost:{port}");
-                options.Urls.Add($"http://127.0.0.1:{port}"); // This must be 127.0.0.1 due to http.sys hostname verification, LiveReload hardcodes it.
-                options.Urls.Add($"http://[::1]:{port}"); // IPv6 Localhost, because why not? All supported platforms should be IPv6 localhost. I hope...
+                if (!IsWindows7OrLower()) // The below only works with Windows 8+.
+                {
+                    options.Urls.Add($"http://127.0.0.1:{port}"); // This must be 127.0.0.1 due to http.sys hostname verification (it allows port sharing), LiveReload hardcodes it though.
+                    options.Urls.Add($"http://[::1]:{port}"); // IPv6 Localhost, because why not? All supported platforms should be IPv6 localhost. I hope...
+                }
                 options.Settings.Add(typeof(ITraceOutputFactory).FullName, typeof(NullTraceOutputFactory).AssemblyQualifiedName);
                 _server = WebApp.Start(options, InjectOwinMiddleware);
             }
@@ -73,6 +76,13 @@ namespace Wyam.LiveReload
                     client.NotifyOfChanges(modifiedFile);
                 }
             }
+        }
+
+        private static bool IsWindows7OrLower()
+        {
+            // Based on http://stackoverflow.com/a/2732463/2001966
+            OperatingSystem os = Environment.OSVersion;
+            return (os.Platform == PlatformID.Win32NT) && (os.Version.Major <= 7);
         }
 
         public void Dispose()
