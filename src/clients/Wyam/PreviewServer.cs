@@ -35,6 +35,9 @@ namespace Wyam
                 {
                     Microsoft.Owin.FileSystems.IFileSystem outputFolder = new PhysicalFileSystem(path.FullPath);
 
+                    // Inject LiveReload script tags to html documents, needs to run first as it overrides output stream.
+                    liveReloadServer?.AddLiveReloadInjectionMiddleware(app);
+
                     // Support for virtual directory
                     if (virtualDirectory != null)
                     {
@@ -75,7 +78,7 @@ namespace Wyam
 
                     // Configure required middleware for the LiveReload protocol.
                     // Run last in the pipeline. We want any user scripts to take precedents.
-                    liveReloadServer?.InjectOwinMiddleware(app);
+                    liveReloadServer?.AddLiveReloadHostingMiddleware(app);
                 });
             }
             catch (Exception ex)

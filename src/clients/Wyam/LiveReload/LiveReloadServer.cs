@@ -32,11 +32,12 @@ namespace Wyam.LiveReload
                 StartOptions options = new StartOptions($"http://localhost:{port}");
                 if (!IsWindows7OrLower()) // The below only works with Windows 8+.
                 {
-                    options.Urls.Add($"http://127.0.0.1:{port}"); // This must be 127.0.0.1 due to http.sys hostname verification (it allows port sharing), LiveReload hardcodes it though.
+                    options.Urls.Add($"http://127.0.0.1:{port}");
+                    // This must be 127.0.0.1 due to http.sys hostname verification (it allows port sharing), LiveReload hardcodes it though.
                     options.Urls.Add($"http://[::1]:{port}"); // IPv6 Localhost, because why not? All supported platforms should be IPv6 localhost. I hope...
                 }
                 options.Settings.Add(typeof(ITraceOutputFactory).FullName, typeof(NullTraceOutputFactory).AssemblyQualifiedName);
-                _server = WebApp.Start(options, InjectOwinMiddleware);
+                _server = WebApp.Start(options, AddLiveReloadHostingMiddleware);
             }
             catch (Exception ex)
             {
@@ -50,7 +51,13 @@ namespace Wyam.LiveReload
             Trace.Verbose($"LiveReload server listening on port {port}.");
         }
 
-        public void InjectOwinMiddleware(IAppBuilder app)
+        public void AddLiveReloadInjectionMiddleware(IAppBuilder app)
+        {
+            // Inject LR script.
+            app.UseLiveReloadScriptInjections();
+        }
+
+        public void AddLiveReloadHostingMiddleware(IAppBuilder app)
         {
             // Host livereload.js
             Assembly liveReloadAssembly = typeof(LiveReloadServer).Assembly;
