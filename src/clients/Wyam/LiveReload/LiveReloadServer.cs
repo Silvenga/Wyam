@@ -2,19 +2,22 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Reflection;
+using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Owin;
 using Microsoft.Owin;
+using Microsoft.Owin.Builder;
 using Microsoft.Owin.FileSystems;
-using Microsoft.Owin.Hosting;
-using Microsoft.Owin.Hosting.Tracing;
 using Microsoft.Owin.StaticFiles;
 
 using Owin;
 using Owin.WebSocket.Extensions;
 
 using Wyam.Common.Tracing;
-using Wyam.Owin;
 
 namespace Wyam.LiveReload
 {
@@ -29,15 +32,42 @@ namespace Wyam.LiveReload
         {
             try
             {
-                StartOptions options = new StartOptions($"http://localhost:{port}");
-                if (!IsWindows7OrLower()) // The below only works with Windows 8+.
-                {
-                    options.Urls.Add($"http://127.0.0.1:{port}");
-                    // This must be 127.0.0.1 due to http.sys hostname verification (it allows port sharing), LiveReload hardcodes it though.
-                    options.Urls.Add($"http://[::1]:{port}"); // IPv6 Localhost, because why not? All supported platforms should be IPv6 localhost. I hope...
-                }
-                options.Settings.Add(typeof(ITraceOutputFactory).FullName, typeof(NullTraceOutputFactory).AssemblyQualifiedName);
-                _server = WebApp.Start(options, AddLiveReloadHostingMiddleware);
+                //StartOptions options = new StartOptions($"http://localhost:{port}");
+                //if (!IsWindows7OrLower()) // The below only works with Windows 8+.
+                //{
+                //    options.Urls.Add($"http://127.0.0.1:{port}");
+                //    // This must be 127.0.0.1 due to http.sys hostname verification (it allows port sharing), LiveReload hardcodes it though.
+                //    options.Urls.Add($"http://[::1]:{port}"); // IPv6 Localhost, because why not? All supported platforms should be IPv6 localhost. I hope...
+                //}
+                //options.Settings.Add(typeof(ITraceOutputFactory).FullName, typeof(NullTraceOutputFactory).AssemblyQualifiedName);
+                //_server = WebApp.Start(options, AddLiveReloadHostingMiddleware);
+
+                var host = new WebHostBuilder()
+                    .UseKestrel()
+                    .UseUrls($"http://localhost:{port}")
+                    .Configure(builder =>
+                    {
+                        builder.UseWebSockets();
+                        //builder.Use(async (context, next) =>
+                        //{
+                        //    if (context.WebSockets.IsWebSocketRequest)
+                        //    {
+                        //        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                             
+                               
+                        //    }
+                        //    else
+                        //    {
+                        //        await next();
+                        //    }
+                        //});
+
+                        builder.UseOwin(app => { AddLiveReloadHostingMiddleware(app); });
+                        Console.WriteLine();
+                    })
+                    .Build();
+
+                host.Start();
             }
             catch (Exception ex)
             {
@@ -54,7 +84,7 @@ namespace Wyam.LiveReload
         public void AddLiveReloadInjectionMiddleware(IAppBuilder app)
         {
             // Inject LR script.
-            app.UseLiveReloadScriptInjections();
+            //app.UseLiveReloadScriptInjections();
         }
 
         public void AddLiveReloadHostingMiddleware(IAppBuilder app)
@@ -95,6 +125,35 @@ namespace Wyam.LiveReload
         public void Dispose()
         {
             _server?.Dispose();
+        }
+    }
+
+    // http://stackoverflow.com/a/30742029/2001966
+    internal static class IApplicationBuilderExtensions
+    {
+        public static void UseOwin(
+            this IApplicationBuilder app,
+            Action<IAppBuilder> owinConfiguration)
+        {
+            app.UseOwin(
+                addToPipeline =>
+                {
+                    addToPipeline(
+                        next =>
+                        {
+                            var builder = new AppBuilder();
+
+                            owinConfiguration(builder);
+
+                            builder.Run(ctx => next(ctx.Environment));
+
+                            Func<IDictionary<string, object>, Task> appFunc =
+                                (Func<IDictionary<string, object>, Task>)
+                                builder.Build(typeof(Func<IDictionary<string, object>, Task>));
+
+                            return appFunc;
+                        });
+                });
         }
     }
 }

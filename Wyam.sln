@@ -112,6 +112,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integration", "integration"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wyam.Docs", "src\extensions\Wyam.Docs\Wyam.Docs.csproj", "{0EB71E59-8D5C-45F3-BF1D-8649BA76D139}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.WebSocket.Fleck", "..\Owin.WebSocket\src\Owin.WebSocket.Fleck\Owin.WebSocket.Fleck.csproj", "{32050A9E-3FC9-4A71-85BF-6645AE68B82B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Owin.WebSocket", "..\Owin.WebSocket\src\Owin.WebSocket\Owin.WebSocket.csproj", "{B1D742F7-39FA-498C-B22E-1A7A61C301E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -294,6 +298,14 @@ Global
 		{0EB71E59-8D5C-45F3-BF1D-8649BA76D139}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EB71E59-8D5C-45F3-BF1D-8649BA76D139}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EB71E59-8D5C-45F3-BF1D-8649BA76D139}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32050A9E-3FC9-4A71-85BF-6645AE68B82B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32050A9E-3FC9-4A71-85BF-6645AE68B82B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32050A9E-3FC9-4A71-85BF-6645AE68B82B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32050A9E-3FC9-4A71-85BF-6645AE68B82B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1D742F7-39FA-498C-B22E-1A7A61C301E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1D742F7-39FA-498C-B22E-1A7A61C301E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1D742F7-39FA-498C-B22E-1A7A61C301E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1D742F7-39FA-498C-B22E-1A7A61C301E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -350,5 +362,7 @@ Global
 		{2E5842F3-4797-4BB5-9A55-F3A005B434F8} = {596452BD-AE34-4989-A36F-88FF72B2DFD8}
 		{C5AED397-4463-4DE7-8A7E-74A4C949E417} = {596452BD-AE34-4989-A36F-88FF72B2DFD8}
 		{0EB71E59-8D5C-45F3-BF1D-8649BA76D139} = {5A431149-2B88-40C3-9717-CA6CCF214317}
+		{32050A9E-3FC9-4A71-85BF-6645AE68B82B} = {43F26311-B67F-4F8D-BBAC-9C6F4B9F5C52}
+		{B1D742F7-39FA-498C-B22E-1A7A61C301E7} = {43F26311-B67F-4F8D-BBAC-9C6F4B9F5C52}
 	EndGlobalSection
 EndGlobal
